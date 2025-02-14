@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+
+# Streamlit cache
+.streamlit/
+
+# Output images
+outputs/
+
+# Logs
+logs/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
