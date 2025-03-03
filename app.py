@@ -1,3 +1,4 @@
+import torch
 import streamlit as st
 import numpy as np
 import cv2
@@ -6,6 +7,8 @@ from PIL import Image
 from utils.image_processing import adjust_brightness, gamma_transform, apply_noise_reduction, sharpen_image, log_transform, apply_median_blur
 from models.model_loader import load_model, postprocess, preprocess
 
+
+print("is Cuda available : ", torch.cuda.is_available())
 # Load the Zero-DCE model
 DCE_net = load_model()
 
@@ -74,11 +77,23 @@ if uploaded_file:
         processed_image = apply_noise_reduction(processed_image, noise_reduction)
     if sharpening > 0:
         processed_image = sharpen_image(processed_image, sharpening)
+    # if auto_adjust:
+    #     processed_image = preprocess(processed_image)
+    #     _,processed_image,_ = DCE_net(processed_image)
+    #     processed_image = postprocess(processed_image)
     if auto_adjust:
-        pass
-        # processed_image = preprocess(processed_image)
-        # _,processed_image,_ = DCE_net(processed_image)
-        # processed_image = postprocess(processed_image)
+        # Set the device and move the model to GPU if available
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        DCE_net.to(device)
+
+        # Preprocess the image and move the tensor to the same device
+        input_tensor = preprocess(processed_image).to(device)
+
+        # Run the model inference
+        _, processed_tensor, _ = DCE_net(input_tensor)
+
+        # Postprocess the output back to a displayable image
+        processed_image = postprocess(processed_tensor)
     if median_blur_strength > 0:
       processed_image = apply_median_blur(processed_image, median_blur_strength)
 

@@ -12,7 +12,8 @@ def load_model(weight_file='Epoch99.pth'):
     weights_path = os.path.join(os.path.dirname(__file__), weight_file)
     model = enhance_net_nopool()  # Initialize the model
     # Map model weights to CPU
-    model.load_state_dict(torch.load(weights_path, map_location=torch.device('cpu')))
+    # model.load_state_dict(torch.load(weights_path, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(weights_path, map_location=torch.device('cuda')))
     model.eval()  # Set the model to evaluation mode
     return model
 
@@ -55,8 +56,9 @@ def postprocess(enhanced_image):
     enhanced_image = enhanced_image.squeeze(0).permute(1, 2, 0)
     
     # Detach the tensor from the computation graph and convert to numpy array
-    enhanced_image = enhanced_image.detach().numpy()
-    
+    # enhanced_image = enhanced_image.detach().numpy()
+    enhanced_image = enhanced_image.cpu().detach().numpy()
+
     # Scale to [0, 255] and convert to uint8
     enhanced_image = (enhanced_image * 255).astype(np.uint8)
     
